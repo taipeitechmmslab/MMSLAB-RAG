@@ -1,14 +1,7 @@
 """
 HyDE - Phase 1：建立索引
 =================================
-index.py 負責將圖書館書籍資料轉成可檢索的向量索引。
-
-執行流程：
-  0. 載入套件與環境變數
-  1. 從 library_records.json 檔案讀取圖書館書籍資料
-  2. 將每本書轉換成 Document 資料結構
-  3. 使用 RecursiveCharacterTextSplitter 將 Documents 切成 chunks
-  4. 使用 NVIDIA NIM Embedding Model 將 chunks 向量化，並透過 Milvus.from_documents 建立 library_books collection 存入向量資料庫
+index.py 負責將圖書館書籍資料轉成可檢索的向量。
 
 執行方式：
   python index.py
@@ -59,7 +52,7 @@ def build_documents(records: list[dict]) -> list[Document]:
             f"內容介紹：{record['description']}"
         )
         # page_content 是語意檢索時會被搜尋的資料
-        # metadata 是不參與向量化的附帶資訊，檢索後可取用，供生成回答時引用
+        # metadata 不會被搜尋，是檢索命中後附帶的參考資料
         documents.append(
             Document(
                 page_content=searchable_text,
@@ -72,7 +65,7 @@ def build_documents(records: list[dict]) -> list[Document]:
 # 使用 RecursiveCharacterTextSplitter 將 Documents 切成 chunks
 def split_documents(documents: list[Document]) -> list[Document]:
     # chunk_size 控制文件片段長度
-    # chunk_overlap 讓相鄰 chunk 保留部分重疊內容，避免切分時遺失上下文
+    # chunk_overlap 讓相鄰 chunk 保留部分重疊內容
     splitter = RecursiveCharacterTextSplitter(
         chunk_size=450,
         chunk_overlap=60,
@@ -85,17 +78,19 @@ def split_documents(documents: list[Document]) -> list[Document]:
     )
     return chunks
 
-# 使用 NVIDIA NIM Embedding Model 將 chunks 向量化，並透過 Milvus.from_documents 建立 library_books collection 存入向量資料庫
+# 將 chunks 向量化後存入到向量資料庫
 def build_vector_store(chunks: list[Document]) -> Milvus:
     print("正在向量化 chunks 並寫入 Milvus，請稍候...")
-    # 建立與向量資料庫連線，並透過 NVIDIA NIM Embedding Model 將 chunks 向量化後存入向量資料庫
+    # 建立與向量資料庫連線
     vector_store = Milvus.from_documents(
+        # 存入 chunks
         documents=chunks,
         # 初始化 NVIDIA NIM Embedding Model
         embedding=NVIDIAEmbeddings(
             model=os.environ.get("EMBEDDING_MODEL"),
             api_key=os.environ.get("NVIDIA_LLM_API_KEY"),
         ),
+        # 初始化 library_books collection
         collection_name="library_books",
         connection_args={"uri": "http://localhost:19530"},
         # 每次重建 collection，確保索引內容與目前 JSON 資料一致
@@ -109,13 +104,13 @@ def build_vector_store(chunks: list[Document]) -> Milvus:
 # main 函數負責讀取資料 → 轉成 Document → 切成 chunks → 向量化並建立索引
 def main() -> None:
     print("=== Phase 1：建立向量索引 ===")
-    # Step 1：載入套件與環境變數
+    # 從 library_records.json 檔案讀取圖書館書籍資料
     records = load_data()
-    # Step 2：從 library_records.json 檔案讀取圖書館書籍資料
+    # 將每本書轉換成 Document 資料結構
     documents = build_documents(records)
-    # Step 3：使用 RecursiveCharacterTextSplitter 將 Documents 切成 chunks
+    # 使用 RecursiveCharacterTextSplitter 將 Documents 切成 chunks
     chunks = split_documents(documents)
-    # Step 4：使用 NVIDIA NIM Embedding Model 將 chunks 向量化，並透過 Milvus.from_documents 建立 library_books collection 存入向量資料庫
+    # 將 chunks 向量化後存入到向量資料庫
     build_vector_store(chunks)
     print(f"成功建立索引，共處理 {len(records)} 本書，可至 http://localhost:8000 瀏覽")
 

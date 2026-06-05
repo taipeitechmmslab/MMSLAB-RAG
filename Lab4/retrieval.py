@@ -3,14 +3,6 @@ HyDE - Phase 2：語意檢索
 =================================
 retrieval.py 負責將使用者問題改寫成 HyDE 假想文件後轉成向量，並從 Milvus 找出最相關的書籍資料。
 
-執行流程：
-  0. 載入套件與環境變數
-  1. 使用 NVIDIA NIM LLM 根據使用者問題生成 HyDE 假想文件
-  2. 連線 Milvus library_books collection
-  3. 使用 HyDE 假想文件搜尋 search_k 個相關 chunks
-  4. 依 book_id 整理搜尋結果，避免同一本書重複出現在推薦結果中
-  5. 回傳最多 top_k 本不同書籍的推薦結果
-
 此模組提供 retrieve() 函式供 main.py 呼叫。
 """
 
@@ -24,7 +16,7 @@ load_dotenv()
 
 # 根據使用者問題生成 HyDE 假想文件，作為語意檢索用的查詢
 def generate_hypothetical_document(query: str) -> str:
-    # 使用 NVIDIA NIM LLM 根據使用者問題生成 HyDE 假想文件
+    # 初始化 NVIDIA NIM LLM
     llm = ChatNVIDIA(
         model=os.environ.get("LLM_MODEL"),
         api_key=os.environ.get("NVIDIA_LLM_API_KEY"),
@@ -47,40 +39,38 @@ def generate_hypothetical_document(query: str) -> str:
 
 # 使用 HyDE 假想文件搜尋 Milvus，回傳最相關的 top_k 本不同書籍
 def retrieve(query: str, top_k: int = 3) -> list[dict]:
-    # 連線 Milvus library_books collection
+    # 建立與向量資料庫連線
     vector_store = Milvus(
         # 初始化 NVIDIA NIM Embedding Model
         embedding_function=NVIDIAEmbeddings(
             model=os.environ.get("EMBEDDING_MODEL"),
             api_key=os.environ.get("NVIDIA_LLM_API_KEY"),
         ),
+        # 連線 library_books collection
         collection_name="library_books",
         connection_args={"uri": "http://localhost:19530"},
-        # metadata（book_id、書名、作者…）在建索引時是存進 Milvus 的動態欄位
-        # 這裡開啟動態欄位，搜尋才會把這些 metadata 一起回傳
+        # 與建索引時一致開啟動態欄位，搜尋才會把 metadata 一起帶回
         enable_dynamic_field=True,
     )
 
-    # top_k 代表最後要回傳的書籍數量
-    # search_k 代表先從 Milvus 取回的 chunks 數量
-    # 因為同一本書可能有多個 chunks 出現在搜尋結果中，所以先取回多個 chunks
-    # 再從多個 chunks 整理出 top_k 本不同書籍
+    # top_k 是最後回傳的書籍數量；search_k 是先從 Milvus 取回的 chunks 數量
+    # 同一本書可能有多個 chunks，先多取一些再去重，湊出最多 top_k 本不同書
     search_k = max(10, top_k * 3)
 
-    # 生成假想文件
+    # 生成 HyDE 假想文件
     hyde_query = generate_hypothetical_document(query)
     print("HyDE 生成的假想文件：")
     print(hyde_query)
     # 使用 HyDE 假想文件搜尋 search_k 個相關 chunks
     results = vector_store.similarity_search_with_score(hyde_query, k=search_k)
 
+    # 依 book_id 去重，避免同一本書重複出現在推薦結果中
     seen_book_ids = set()
     docs = []
-
     # results 已依相似度排序，每本書第一次出現的就是它最相關的 chunk
     for doc, score in results:
         book_id = doc.metadata.get("book_id")
-        # 依 book_id 整理搜尋結果，避免同一本書重複出現在推薦結果中
+        # 同一本書只保留第一次（最相關）出現的結果
         if not book_id or book_id in seen_book_ids:
             continue
 

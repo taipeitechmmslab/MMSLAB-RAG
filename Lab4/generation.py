@@ -3,14 +3,6 @@ HyDE - Phase 3：生成回答
 =================================
 generation.py 負責將檢索到的書籍資料整理成 prompt，並呼叫 NVIDIA NIM LLM 生成回答。
 
-執行流程：
-  0. 載入套件與環境變數
-  1. 將 retrieved_docs 格式化為可讀的書籍清單，作為 LLM 回答問題的 Context
-  2. 使用 NVIDIA NIM LLM 初始化 moonshotai/kimi-k2-instruct 生成模型
-  3. 組裝 System Prompt 與 Human Prompt，放入回答規則、書籍資料與使用者問題
-  4. 將 System Prompt 與 Human Prompt 轉成對話訊息，呼叫 LLM 生成有資料依據的回答
-  5. 回傳回答字串
-
 此模組提供 generate() 函式供 main.py 呼叫。
 """
 
@@ -38,7 +30,7 @@ def generate(query: str, retrieved_docs: list[dict]) -> str:
                 borrowed_text = f"目前已借出（借閱者：{borrower_name}）" if borrower_name else "目前已借出"
             else:
                 borrowed_text = "目前可借閱"
-            # matched_page_content 是向量檢索時命中的相關段落，供 LLM 說明推薦理由
+            # matched_page_content 是語意檢索時命中的相關段落，供 LLM 說明推薦理由
             matched_page_content = doc.get("matched_page_content", "")
             # 將單本書的欄位整理成固定格式，作為 LLM 回答時的參考資料
             lines.append(
@@ -50,7 +42,7 @@ def generate(query: str, retrieved_docs: list[dict]) -> str:
         # 每本書之間以空行分隔，讓 LLM 能清楚區分不同書籍資料
         context = "\n\n".join(lines)
 
-    # 初始化 LLM 模型
+    # 初始化 NVIDIA NIM LLM
     llm = ChatNVIDIA(
         model=os.environ.get("LLM_MODEL"),
         api_key=os.environ.get("NVIDIA_LLM_API_KEY"),
