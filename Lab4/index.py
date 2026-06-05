@@ -100,7 +100,7 @@ def build_vector_store(chunks: list[Document]) -> Milvus:
         connection_args={"uri": "http://localhost:19530"},
         # 每次重建 collection，確保索引內容與目前 JSON 資料一致
         drop_old=True,
-        # 允許 metadata 欄位動態寫入，省去預先定義 schema
+        # 允許 metadata 動態欄位寫入，省去預先定義 schema
         enable_dynamic_field=True,
     )
     print(f"已建立 library_books Collection 並存入 {len(chunks)} 個 chunks")
