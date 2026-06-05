@@ -1,5 +1,5 @@
 """
-Vector RAG - Phase 3：生成回答
+HyDE - Phase 3：生成回答
 =================================
 generation.py 負責將檢索到的書籍資料整理成 prompt，並呼叫 NVIDIA NIM LLM 生成回答。
 
@@ -14,19 +14,15 @@ generation.py 負責將檢索到的書籍資料整理成 prompt，並呼叫 NVID
 此模組提供 generate() 函式供 main.py 呼叫。
 """
 
-# 載入套件
+# 載入套件與環境變數
 import os
-
 from dotenv import load_dotenv
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_nvidia_ai_endpoints import ChatNVIDIA
-
-# 載入環境變數
 load_dotenv()
 
-
+# 根據檢索到的書籍資料，呼叫 LLM 生成回答
 def generate(query: str, retrieved_docs: list[dict]) -> str:
-    """根據檢索到的書籍資料，呼叫 LLM 生成回答。"""
     # 將 retrieved_docs 格式化為可讀的書籍清單，作為 LLM 回答問題的 Context
     if not retrieved_docs:
         context = "（查無相關書籍資料）"

@@ -1,5 +1,5 @@
 """
-Vector RAG - Phase 2：語意檢索
+HyDE - Phase 2：語意檢索
 =================================
 retrieval.py 負責將使用者問題改寫成 HyDE 假想文件後轉成向量，並從 Milvus 找出最相關的書籍資料。
 
