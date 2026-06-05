@@ -8,7 +8,7 @@ index.py 負責將圖書館書籍資料轉成可檢索的向量索引。
   1. 從 library_records.json 檔案讀取圖書館書籍資料
   2. 將每本書轉換成 Document 資料結構
   3. 使用 RecursiveCharacterTextSplitter 將 Documents 切成 chunks
-  4. 使用 Embedding Model 將 chunks 向量化，並透過 Milvus.from_documents 建立 library_books collection 存入向量資料庫
+  4. 使用 NVIDIA NIM Embedding Model 將 chunks 向量化，並透過 Milvus.from_documents 建立 library_books collection 存入向量資料庫
 
 執行方式：
   python index.py
@@ -85,13 +85,13 @@ def split_documents(documents: list[Document]) -> list[Document]:
     )
     return chunks
 
-# 使用 Embedding Model 將 chunks 向量化，並透過 Milvus.from_documents 建立 library_books collection 存入向量資料庫
+# 使用 NVIDIA NIM Embedding Model 將 chunks 向量化，並透過 Milvus.from_documents 建立 library_books collection 存入向量資料庫
 def build_vector_store(chunks: list[Document]) -> Milvus:
     print("正在向量化 chunks 並寫入 Milvus，請稍候...")
-    # 建立與向量資料庫連線，並透過 Embedding Model 將 chunks 向量化後存入向量資料庫
+    # 建立與向量資料庫連線，並透過 NVIDIA NIM Embedding Model 將 chunks 向量化後存入向量資料庫
     vector_store = Milvus.from_documents(
         documents=chunks,
-        # 初始化 Embedding Model
+        # 初始化 NVIDIA NIM Embedding Model
         embedding=NVIDIAEmbeddings(
             model=os.environ.get("EMBEDDING_MODEL"),
             api_key=os.environ.get("NVIDIA_LLM_API_KEY"),
@@ -115,7 +115,7 @@ def main() -> None:
     documents = build_documents(records)
     # Step 3：使用 RecursiveCharacterTextSplitter 將 Documents 切成 chunks
     chunks = split_documents(documents)
-    # Step 4：使用 Embedding Model 將 chunks 向量化，並透過 Milvus.from_documents 建立 library_books collection 存入向量資料庫
+    # Step 4：使用 NVIDIA NIM Embedding Model 將 chunks 向量化，並透過 Milvus.from_documents 建立 library_books collection 存入向量資料庫
     build_vector_store(chunks)
     print(f"成功建立索引，共處理 {len(records)} 本書，可至 http://localhost:8000 瀏覽")
 
