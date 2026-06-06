@@ -25,6 +25,7 @@ def load_data() -> list[dict]:
     return records
 
 # 將每本書轉換成 Document 資料結構
+# Document 包含 Page Content 儲存書籍內容、Meta Data 儲存書籍名稱、作者等資訊
 def build_documents(records: list[dict]) -> list[Document]:
     documents = []
     for record in records:
@@ -70,6 +71,7 @@ def split_documents(documents: list[Document]) -> list[Document]:
         chunk_size=450,
         chunk_overlap=60,
     )
+    # Chunks 是所有 Chunk 的集合
     chunks = splitter.split_documents(documents)
 
     print(
@@ -78,7 +80,7 @@ def split_documents(documents: list[Document]) -> list[Document]:
     )
     return chunks
 
-# 將 chunks 向量化後存入到向量資料庫
+# 將 chunks 向量化後存入到向量資料庫中的 library_books collection
 def build_vector_store(chunks: list[Document]) -> Milvus:
     print("正在向量化 chunks 並寫入 Milvus，請稍候...")
     # 建立與向量資料庫連線
@@ -90,7 +92,7 @@ def build_vector_store(chunks: list[Document]) -> Milvus:
             model=os.environ.get("EMBEDDING_MODEL"),
             api_key=os.environ.get("NVIDIA_LLM_API_KEY"),
         ),
-        # 初始化 library_books collection
+        # 連線的 collection 名稱
         collection_name="library_books",
         connection_args={"uri": "http://localhost:19530"},
         # 每次重建 collection，確保索引內容與目前 JSON 資料一致

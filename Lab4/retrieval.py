@@ -21,15 +21,17 @@ def generate_hypothetical_document(query: str) -> str:
         model=os.environ.get("LLM_MODEL"),
         api_key=os.environ.get("NVIDIA_LLM_API_KEY"),
     )
-
+    # System Prompt 放入回答規則，讓 LLM 進行 HyDE
     system_prompt = (
         "你是圖書館館藏檢索助理。"
         "請根據讀者問題，生成一段可能出現在相關書籍資料中的內容介紹。"
         "不要回答問題，不要列出真實書名，不要編造館藏資料。"
         "只需要生成一段適合向量檢索的繁體中文描述。"
     )
+    # Human Prompt 放入使用者問題
     human_prompt = f"讀者問題：{query}"
 
+    # 組合 System Prompt 與 User Prompt
     response = llm.invoke([
         SystemMessage(content=system_prompt),
         HumanMessage(content=human_prompt),
@@ -37,7 +39,8 @@ def generate_hypothetical_document(query: str) -> str:
 
     return response.content.strip()
 
-# 使用 HyDE 假想文件搜尋 Milvus，回傳最相關的 top_k 本不同書籍
+# 使用 HyDE 假想文件搜尋向量資料庫
+# 從 library_books collection 回傳最相關的 top_k 本不同書籍
 def retrieve(query: str, top_k: int = 3) -> list[dict]:
     # 建立與向量資料庫連線
     vector_store = Milvus(
