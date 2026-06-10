@@ -6,27 +6,31 @@ generation.py 負責將檢索到的書籍資料整理成 prompt，並呼叫 NVID
 此模組提供 generate() 函式供 main.py 呼叫。
 """
 
-# 載入套件與環境變數
+# ── 載入套件與環境變數 ──────────────────────────────
 import os
 from dotenv import load_dotenv
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_nvidia_ai_endpoints import ChatNVIDIA
 load_dotenv()
 
-# 根據檢索到的書籍資料，呼叫 LLM 生成回答
+# ── 根據檢索到的書籍資料呼叫 LLM 生成回答 ────────────
 def generate(query: str, retrieved_docs: list[dict]) -> str:
     # 將 retrieved_docs 格式化為可讀的書籍清單，作為 LLM 回答問題的 Context
     if not retrieved_docs:
+        # 無檢索結果時給 LLM 一個明確提示，避免 LLM 憑空捏造
         context = "（查無相關書籍資料）"
     else:
         # lines 暫存每本書格式化後的文字，最後再合併成完整 Context
         lines = []
+        # 用計數器 i 為每本書標上編號，從 1 開始
         for i, doc in enumerate(retrieved_docs, 1):
             # metadata 保存書名、分類、作者、價格與借閱狀態等書籍資訊
             metadata = doc.get("metadata", {})
+            # 取出借閱者姓名，用於組合借閱狀態文字
             borrower_name = metadata.get("borrower_name", "")
-            # 判斷書籍是否被借出
+            # 根據 is_borrowed 產生對應的借閱狀態文字
             if metadata.get("is_borrowed"):
+                # 已借出時若有借閱者姓名則一併顯示
                 borrowed_text = f"目前已借出（借閱者：{borrower_name}）" if borrower_name else "目前已借出"
             else:
                 borrowed_text = "目前可借閱"
@@ -44,8 +48,10 @@ def generate(query: str, retrieved_docs: list[dict]) -> str:
 
     # 初始化 NVIDIA NIM LLM
     llm = ChatNVIDIA(
+        # 從環境變數取得 LLM 模型名稱
         model=os.environ.get("LLM_MODEL"),
-        api_key=os.environ.get("NVIDIA_LLM_API_KEY"),
+        # 從環境變數取得 NVIDIA API 金鑰
+        api_key=os.environ.get("NVIDIA_NIM_API_KEY"),
     )
 
     # System Prompt 放入回答規則，限制 LLM 只能根據提供的書籍資料回答
@@ -70,10 +76,13 @@ def generate(query: str, retrieved_docs: list[dict]) -> str:
         f"請根據以上書籍資料回答讀者的問題。"
     )
 
-    # 將 System Prompt 與 Human Prompt 轉成對話訊息，呼叫 LLM 生成有資料依據的回答
+    # 組合 System Prompt 與 Human Prompt，呼叫 LLM 生成有資料依據的回答
     response = llm.invoke([
+        # System Prompt 設定 LLM 的角色與回答規則
         SystemMessage(content=system_prompt),
+        # Human Prompt 傳入書籍 Context 與使用者問題
         HumanMessage(content=human_prompt),
     ])
 
+    # 回傳 LLM 生成的回答內容
     return response.content
