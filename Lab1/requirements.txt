@@ -1,0 +1,6 @@
+langchain 
+langchain-nvidia-ai-endpoints 
+langchain-milvus==0.1.8
+langchain-text-splitters
+pymilvus>=2.5,<2.6 
+python-dotenv 
