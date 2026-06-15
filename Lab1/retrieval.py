@@ -14,7 +14,7 @@ from langchain_nvidia_ai_endpoints import NVIDIAEmbeddings
 load_dotenv()
 
 # ── 使用問題向量從 Milvus 向量資料庫檢索書籍 ────────────
-def retrieve(query: str, top_k: int = 3) -> list[dict]:
+def retrieve(query: str, top_k: int = 5) -> list[dict]:
     # 建立 Milvus 向量資料庫的連線物件
     vector_store = Milvus(
         # 問題向量需與建索引時使用相同的 Embedding Model
