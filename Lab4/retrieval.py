@@ -48,7 +48,7 @@ def generate_hypothetical_document(query: str) -> str:
 def retrieve(query: str, top_k: int = 3) -> list[dict]:
     # 建立 Milvus 向量資料庫的連線物件
     vector_store = Milvus(
-        # 查詢向量需與建索引時使用相同的 Embedding Model
+        #問題向量需與建索引時使用相同的 Embedding Model
         embedding_function=NVIDIAEmbeddings(
             # 從環境變數取得 Embedding 模型名稱
             model=os.environ.get("EMBEDDING_MODEL"),
@@ -67,7 +67,7 @@ def retrieve(query: str, top_k: int = 3) -> list[dict]:
     # search_k 至少為 10，或 top_k 的 3 倍，以免去重後書籍數量不足
     search_k = max(10, top_k * 3)
 
-    # 將使用者問題轉成 HyDE 假想文件，作為語意檢索的查詢向量來源
+    # 將使用者問題轉成 HyDE 假想文件，作為語意檢索的問題向量來源
     hyde_query = generate_hypothetical_document(query)
     # 印出假想文件，方便觀察 HyDE 生成的內容
     print("HyDE 生成的假想文件：")
