@@ -1,0 +1,22 @@
+services:
+  neo4j:
+    image: neo4j:5.20-community
+    container_name: graph_rag_neo4j
+    ports:
+      - "7474:7474" # 瀏覽器 UI：http://localhost:7474
+      - "7687:7687" # Python driver 連線用 Bolt port
+    environment:
+      # 預設帳號 neo4j
+      # 密碼 graphrag
+      NEO4J_AUTH: neo4j/graphrag
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+      - neo4j_import:/var/lib/neo4j/import
+      - neo4j_plugins:/plugins
+
+volumes:
+  neo4j_data:
+  neo4j_logs:
+  neo4j_import:
+  neo4j_plugins:

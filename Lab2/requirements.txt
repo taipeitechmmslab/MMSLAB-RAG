@@ -1,0 +1,5 @@
+langchain
+langchain-nvidia-ai-endpoints
+langchain-community
+neo4j
+python-dotenv
