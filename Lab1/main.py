@@ -51,7 +51,7 @@ def main() -> None:
         if not query:
             continue
 
-        # 呼叫 retrieval.py 進行向量檢索，取回最相關的 5 本書
+        # 呼叫 retrieval.py 進行向量檢索，取回 Top-K 為 5 的最相關書籍
         print()
         print("正在檢索相關書籍...")
         docs = retrieve(query, top_k=5)
