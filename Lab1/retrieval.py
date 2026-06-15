@@ -1,7 +1,7 @@
 """
 Vector RAG - Phase 2：向量檢索
 =================================
-retrieval.py 負責將使用者問題轉成查詢向量，並從 Milvus 找出最相關的書籍資料。
+retrieval.py 負責將使用者問題轉成問題向量，並從 Milvus 找出最相關的書籍資料。
 
 此模組提供 retrieve() 函式供 main.py 呼叫。
 """
@@ -13,11 +13,11 @@ from langchain_milvus import Milvus
 from langchain_nvidia_ai_endpoints import NVIDIAEmbeddings
 load_dotenv()
 
-# ── 使用查詢向量從 Milvus 向量資料庫檢索書籍 ────────────
+# ── 使用問題向量從 Milvus 向量資料庫檢索書籍 ────────────
 def retrieve(query: str, top_k: int = 3) -> list[dict]:
     # 建立 Milvus 向量資料庫的連線物件
     vector_store = Milvus(
-        # 查詢向量需與建索引時使用相同的 Embedding Model
+        # 問題向量需與建索引時使用相同的 Embedding Model
         embedding_function=NVIDIAEmbeddings(
             # 從環境變數取得 Embedding 模型名稱
             model=os.environ.get("EMBEDDING_MODEL"),
@@ -36,7 +36,7 @@ def retrieve(query: str, top_k: int = 3) -> list[dict]:
     # search_k 至少為 10，或 top_k 的 3 倍，以免去重後書籍數量不足
     search_k = max(10, top_k * 3)
 
-    # 將使用者問題轉成查詢向量，在 Milvus 中搜尋最相近的 search_k 個 chunks，同時回傳相似度分數
+    # 將使用者問題轉成問題向量，在 Milvus 中搜尋最相近的 search_k 個 chunks，同時回傳相似度分數
     results = vector_store.similarity_search_with_score(query, k=search_k)
 
     # 用 set 記錄已出現的 book_id，避免同一本書重複加入結果
