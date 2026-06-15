@@ -1,8 +1,8 @@
-langchain
-langchain-nvidia-ai-endpoints
-langchain-community
+langchain==0.3.30
+langchain-nvidia-ai-endpoints==0.3.19
+langchain-community==0.3.31
 langchain-milvus==0.1.8
-langchain-text-splitters
-pymilvus>=2.5,<2.6
-neo4j
-python-dotenv
+langchain-text-splitters==0.3.11
+pymilvus==2.5.18
+neo4j==6.2.0
+python-dotenv==1.2.2
