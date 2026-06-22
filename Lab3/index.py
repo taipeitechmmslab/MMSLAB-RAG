@@ -128,7 +128,7 @@ def build_vector_store(chunks: list[Document]) -> Milvus:
             # 從環境變數取得 Embedding Model 名稱
             model=os.environ.get("EMBEDDING_MODEL"),
             # 從環境變數取得 NVIDIA API 金鑰
-            api_key=os.environ.get("NVIDIA_LLM_API_KEY"),
+            api_key=os.environ.get("NVIDIA_NIM_API_KEY"),
         ),
         # 指定要存入的 Milvus collection 名稱
         collection_name="library_books",

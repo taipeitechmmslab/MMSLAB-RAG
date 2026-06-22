@@ -14,7 +14,7 @@ from langchain_milvus import Milvus
 from langchain_nvidia_ai_endpoints import ChatNVIDIA, NVIDIAEmbeddings
 load_dotenv()
 
-# ── 根據使用者問題生成 HyDE 假想文件 ────────────────
+# ── 根據使用者問題生成假想文件 ────────────────
 def generate_hypothetical_document(query: str) -> str:
     # 初始化 NVIDIA NIM LLM
     llm = ChatNVIDIA(
@@ -44,7 +44,7 @@ def generate_hypothetical_document(query: str) -> str:
     # 回傳假想文件內容，並去除空字元
     return response.content.strip()
 
-# ── 使用 HyDE 假想文件從 Milvus 向量資料庫檢索書籍 ────────────
+# ── 使用假想文件從 Milvus 向量資料庫檢索書籍 ────────────
 def retrieve(query: str, top_k: int = 5) -> list[dict]:
     # 建立 Milvus 向量資料庫的連線物件
     vector_store = Milvus(
@@ -67,7 +67,7 @@ def retrieve(query: str, top_k: int = 5) -> list[dict]:
     # search_k 至少為 10，或 top_k 的 3 倍，以免去重後書籍數量不足
     search_k = max(10, top_k * 3)
 
-    # 將使用者問題轉成 HyDE 假想文件，作為語意檢索的問題向量來源
+    # 將使用者問題轉成假想文件，作為語意檢索的問題向量來源
     hyde_query = generate_hypothetical_document(query)
     # 印出假想文件，方便觀察 HyDE 生成的內容
     print("HyDE 生成的假想文件：")

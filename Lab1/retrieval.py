@@ -21,8 +21,8 @@ def retrieve(query: str, top_k: int = 5) -> list[dict]:
         embedding_function=NVIDIAEmbeddings(
             # 從環境變數取得 Embedding 模型名稱
             model=os.environ.get("EMBEDDING_MODEL"),
-            # 從環境變數取得 NVIDIA API 金鑰
-            api_key=os.environ.get("NVIDIA_LLM_API_KEY"),
+            # 從環境變數取得 NVIDIA NIM API 金鑰
+            api_key=os.environ.get("NVIDIA_NIM_API_KEY"),
         ),
         # 指定要查詢的 Milvus collection 名稱
         collection_name="library_books",

@@ -91,7 +91,7 @@ def generate(query: str, vector_docs: list[dict], graph_result: dict) -> str:
         # 從環境變數取得 LLM 模型名稱
         model=os.environ.get("LLM_MODEL"),
         # 從環境變數取得 NVIDIA API 金鑰
-        api_key=os.environ.get("NVIDIA_LLM_API_KEY"),
+        api_key=os.environ.get("NVIDIA_NIM_API_KEY"),
     )
 
     # System Prompt 放入回答規則，限制 LLM 只能根據提供的兩組資料回答

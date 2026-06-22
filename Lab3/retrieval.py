@@ -100,7 +100,7 @@ def vector_retrieve(query: str, top_k: int = 5) -> list[dict]:
             # 從環境變數取得 Embedding 模型名稱
             model=os.environ.get("EMBEDDING_MODEL"),
             # 從環境變數取得 NVIDIA API 金鑰
-            api_key=os.environ.get("NVIDIA_LLM_API_KEY"),
+            api_key=os.environ.get("NVIDIA_NIM_API_KEY"),
         ),
         # 指定要查詢的 Milvus collection 名稱
         collection_name="library_books",
@@ -187,7 +187,7 @@ def graph_retrieve(query: str) -> dict:
             # 從環境變數取得 LLM 模型名稱
             model=os.environ.get("LLM_MODEL"),
             # 從環境變數取得 NVIDIA API 金鑰
-            api_key=os.environ.get("NVIDIA_LLM_API_KEY"),
+            api_key=os.environ.get("NVIDIA_NIM_API_KEY"),
             # 降低 LLM 回答時的隨機性，讓相同問題盡量產生一致的 Cypher
             temperature=0.0,
         )

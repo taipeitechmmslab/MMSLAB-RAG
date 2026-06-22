@@ -50,8 +50,8 @@ def generate(query: str, retrieved_docs: list[dict]) -> str:
     llm = ChatNVIDIA(
         # 從環境變數取得 LLM 模型名稱
         model=os.environ.get("LLM_MODEL"),
-        # 從環境變數取得 NVIDIA API 金鑰
-        api_key=os.environ.get("NVIDIA_LLM_API_KEY"),
+        # 從環境變數取得 NVIDIA NIM API 金鑰
+        api_key=os.environ.get("NVIDIA_NIM_API_KEY"),
     )
 
     # System Prompt 放入回答規則，限制 LLM 只能根據提供的書籍資料回答
