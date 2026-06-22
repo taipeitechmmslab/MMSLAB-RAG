@@ -69,7 +69,7 @@ def retrieve(query: str, top_k: int = 5) -> list[dict]:
 
     # 將使用者問題轉成假想文件，作為語意檢索的問題向量來源
     hyde_query = generate_hypothetical_document(query)
-    # 印出假想文件，方便觀察 HyDE 生成的內容
+    # 印出並觀察生成的假想文件內容
     print("HyDE 生成的假想文件：")
     print(hyde_query)
     # 用假想文件向量在 Milvus 中搜尋最相近的 search_k 個 chunks，同時回傳相似度分數
