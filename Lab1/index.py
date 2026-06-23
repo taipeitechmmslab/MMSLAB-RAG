@@ -138,7 +138,7 @@ def build_vector_store(chunks: list[Document]) -> None:
         enable_dynamic_field=True,
     )
     # 確認寫入完成
-    print(f"已建立 library_books Collection 並存入 {len(chunks)} 個 chunks")
+    print(f"已建立 library_books collection 並存入 {len(chunks)} 個 chunks")
 
 
 # ── 主程式進入點 ─────────────────────────

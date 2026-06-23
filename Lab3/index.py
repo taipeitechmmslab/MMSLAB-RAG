@@ -140,7 +140,7 @@ def build_vector_store(chunks: list[Document]) -> Milvus:
         enable_dynamic_field=True,
     )
     # 確認寫入完成
-    print(f"已建立 library_books Collection 並存入 {len(chunks)} 個 chunks")
+    print(f"已建立 library_books collection 並存入 {len(chunks)} 個 chunks")
     # 回傳建立好的向量資料庫物件
     return vector_store
 
