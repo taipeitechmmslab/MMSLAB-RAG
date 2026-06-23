@@ -57,12 +57,6 @@ def main() -> None:
         print("正在生成 Cypher 並查詢知識圖譜...")
         result = retrieve(query)
 
-        # 尚未建立索引時提示先執行 index.py，並結束問答流程
-        if result["error"] == "請先執行 index.py 進行書籍索引":
-            print("請先執行 index.py 進行書籍索引")
-            print()
-            break
-
         # 展示 LLM 生成的 Cypher，逐行加上邊框符號方便閱讀
         print("\nLLM 生成的 Cypher 查詢：")
         for line in result["cypher"].splitlines():

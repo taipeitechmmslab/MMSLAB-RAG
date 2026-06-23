@@ -58,12 +58,6 @@ def main() -> None:
         print("正在執行向量檢索...")
         vector_docs = vector_retrieve(query, top_k=5)
 
-        # 向量檢索無結果代表尚未建立索引，提示先執行 index.py 並結束流程
-        if not vector_docs:
-            print("請先執行 index.py 進行書籍索引")
-            print()
-            break
-
         # 顯示向量檢索到的書籍清單與相似距離分數
         print("\n向量檢索結果（相似距離分數越小，語意越相近）：")
         # 用計數器 i 為每本書標上編號，從 1 開始
@@ -82,12 +76,6 @@ def main() -> None:
         # 呼叫 retrieval.py 的 graph_retrieve 進行知識圖譜檢索，由 LLM 生成 Cypher 後查詢 Neo4j
         print("正在生成 Cypher 並查詢知識圖譜...")
         graph_result = graph_retrieve(query)
-
-        # 尚未建立索引時提示先執行 index.py，並結束問答流程
-        if graph_result["error"] == "請先執行 index.py 進行書籍索引":
-            print("請先執行 index.py 進行書籍索引")
-            print()
-            break
 
         # 展示 LLM 生成的 Cypher，逐行加上邊框符號方便閱讀
         print("\nLLM 生成的 Cypher 查詢：")

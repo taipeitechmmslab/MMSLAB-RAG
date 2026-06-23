@@ -156,32 +156,6 @@ def graph_retrieve(query: str) -> dict:
     # 預設 cypher 為空字串，若在生成前就發生錯誤也能一併回傳
     cypher = ""
     try:
-        # 先確認 Neo4j 裡已有 Book 節點，避免還沒索引時就呼叫 LLM
-        with GraphDatabase.driver(
-            # Neo4j 服務的連線位址
-            "bolt://localhost:7687",
-            # 從環境變數取得 Neo4j 帳號與密碼
-            auth=(os.environ["NEO4J_USERNAME"], os.environ["NEO4J_PASSWORD"]),
-        ) as driver:
-            # 以 session 執行查詢，離開 with 區塊時自動關閉
-            with driver.session() as session:
-                # 統計目前知識圖譜中的 Book 節點數
-                book_count = session.run(
-                    "MATCH (b:Book) RETURN count(b) AS book_count"
-                ).single()["book_count"]
-
-        # 沒有任何 Book 節點代表尚未建立索引，丟出例外交由下方 except 處理
-        if book_count == 0:
-            raise ValueError("Book index is empty")
-    except Exception:
-        # 尚未索引或連線失敗時，回傳明確提示供 main.py 顯示
-        return {
-            "cypher": "",
-            "results": [],
-            "error": "請先執行 index.py 進行書籍索引",
-        }
-
-    try:
         # 建立 LLM，準備將使用者問題轉成 Cypher 查詢
         llm = ChatNVIDIA(
             # 從環境變數取得 LLM 模型名稱
