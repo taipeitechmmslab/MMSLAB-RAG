@@ -1,7 +1,7 @@
 """
 Vector RAG - Phase 1：建立索引
 =================================
-index.py 負責將圖書館書籍資料轉成可檢索的向量索引。
+index.py 負責將圖書館書籍資料轉成可檢索的向量。
 
 執行方式：
   python index.py
@@ -61,7 +61,7 @@ def build_documents(records: list[dict]) -> list[Document]:
         borrowed_text = "已借出" if borrower else "可借閱"
         # 取得借閱者姓名
         borrower_name = borrower.get("name", "")
-        # 組合成自然語言格式的字串，供向量檢索使用
+        # 組合成自然語言格式的字串，供語意檢索使用
         searchable_text = (
             # 書名欄位
             f"書名：{record['book']}\n"
@@ -105,7 +105,7 @@ def split_documents(documents: list[Document]) -> list[Document]:
 
     print(
         # 輸出總 chunk 數
-        f"已切成 {len(chunks)} 個 chunks "
+        f"已切成 {len(chunks)} 個 chunk "
         # 同時說明所使用的切割參數
         "（chunk_size=450, overlap=60）"
     )
@@ -114,11 +114,11 @@ def split_documents(documents: list[Document]) -> list[Document]:
 
 
 # ── 將所有 chunk 向量化並存入 Milvus 向量資料庫────────────
-def build_vector_store(chunks: list[Document]) -> Milvus:
+def build_vector_store(chunks: list[Document]) -> None:
     # 提示使用者此步驟需要一些時間
     print("正在向量化 chunks 並寫入 Milvus，請稍候...")
     # 將 chunks 進行向量化，並存入向量資料庫
-    vector_store = Milvus.from_documents(
+    Milvus.from_documents(
         # 傳入要存入的 chunk list
         documents=chunks,
         # 指定使用 NVIDIA NIM Embedding Model 進行向量化
@@ -139,8 +139,6 @@ def build_vector_store(chunks: list[Document]) -> Milvus:
     )
     # 確認寫入完成
     print(f"已建立 library_books Collection 並存入 {len(chunks)} 個 chunks")
-    # 回傳建立好的向量資料庫物件
-    return vector_store
 
 
 # ── 主程式進入點 ─────────────────────────
@@ -161,4 +159,5 @@ def main() -> None:
 
 # 確保此檔案被直接執行時才呼叫 main()，被 import 時不執行
 if __name__ == "__main__":
+    # 呼叫主程式
     main()
