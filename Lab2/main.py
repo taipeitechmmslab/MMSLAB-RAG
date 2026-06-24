@@ -36,7 +36,7 @@ def main() -> None:
     while True:
         try:
             # 讀取使用者輸入並去除頭尾空白
-            query = input("請輸入問題（輸入 'quit' 離開）：").strip()
+            query = input("請輸入問題（輸入 'quit' 離開）：\n> ").strip()
         except (KeyboardInterrupt, EOFError):
             # 支援 Ctrl+C 或 EOF 中斷程式
             print("\n感謝使用，再見！")

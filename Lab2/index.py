@@ -124,7 +124,6 @@ def build_graph_index(records: list[dict]) -> None:
                 MERGE (c:Category {name: $category})
                 MERGE (b)-[:BELONGS_TO]->(c)
                 """,
-                # 以參數帶入書籍資料，避免字串拼接造成 Cypher 注入
                 book_id=book_id,
                 title=title,
                 price=price,
