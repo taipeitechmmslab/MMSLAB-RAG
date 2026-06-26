@@ -1,5 +1,5 @@
 """
-Hybrid RAG - Phase 1：建立混合索引
+Hybrid RAG - Phase 1：建立向量索引與知識圖譜
 =================================
 index.py 負責將圖書館書籍資料同時建立成 Milvus 向量索引與 Neo4j 知識圖譜。
 
@@ -145,7 +145,7 @@ def build_vector_store(chunks: list[Document]) -> Milvus:
     return vector_store
 
 
-# ── 將書籍資料建立成 Neo4j 知識圖譜索引 ──────────
+# ── 將書籍資料建立成 Neo4j 知識圖譜 ──────────
 def build_graph_index(records: list[dict]) -> None:
     # 連線到 Neo4j 圖資料庫
     driver = GraphDatabase.driver(
@@ -159,7 +159,7 @@ def build_graph_index(records: list[dict]) -> None:
 
     # 以 session 為單位執行 Cypher，離開 with 區塊時自動關閉 session
     with driver.session() as session:
-        # 清空 Neo4j 圖資料庫中的知識圖譜索引，避免保留上一次實驗留下的舊知識圖譜索引
+        # 清空 Neo4j 圖資料庫中的知識圖譜，避免保留上一次實驗留下的舊知識圖譜
         session.run("MATCH (n) DETACH DELETE n")
         print("已清除舊知識圖譜")
 
@@ -179,7 +179,7 @@ def build_graph_index(records: list[dict]) -> None:
             session.run(cypher)
         print("已建立 Book / Category / Author / Borrower 節點防重複規則")
 
-        # 逐筆建立知識圖譜索引：
+        # 逐筆建立知識圖譜：
         #   節點：Book、Category、Author、Borrower
         #   關係：BELONGS_TO、WROTE、BORROWED
         print("正在建立 Neo4j 知識圖譜，請稍候...")
@@ -304,7 +304,7 @@ def build_graph_index(records: list[dict]) -> None:
 # ── 主程式進入點 ─────────────────────────
 def main() -> None:
     # 顯示目前的執行階段
-    print("=== Phase 1：建立 Hybrid RAG 混合索引 ===")
+    print("=== Phase 1：建立向量索引與知識圖譜 ===")
     # 從 JSON 檔案讀取書籍原始資料
     records = load_data()
 
@@ -316,13 +316,13 @@ def main() -> None:
     # 向量化 chunks 並存入 Milvus 向量資料庫
     build_vector_store(chunks)
 
-    print("\n--- 建立知識圖譜索引（Neo4j）---")
+    print("\n--- 建立知識圖譜（Neo4j）---")
     # 將原始資料建立成 Neo4j 知識圖譜索引
     build_graph_index(records)
 
     print()
     # 顯示完成索引與可瀏覽的服務位址
-    print(f"成功建立 Hybrid RAG 索引，共處理 {len(records)} 本書")
+    print(f"成功建立向量索引與知識圖譜，共處理 {len(records)} 本書")
     print("Milvus / Attu：http://localhost:8000")
     print("Neo4j Browser：http://localhost:7474")
 

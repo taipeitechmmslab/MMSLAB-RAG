@@ -1,10 +1,10 @@
 """
 Hybrid RAG - 主程式入口
 =================================
-main.py 負責啟動互動式圖書館問答系統，使用 Phase 1 建好的混合索引，
+main.py 負責啟動互動式圖書館問答系統，使用 Phase 1 建好的向量索引與知識圖譜，
 並呼叫 Phase 2 與 Phase 3 完成檢索與回答生成：
   Phase 1（index.py）     → 事先建立 Milvus 向量索引與 Neo4j 知識圖譜
-  Phase 2（retrieval.py） → 同時執行向量檢索與知識圖譜檢索
+  Phase 2（retrieval.py） → 同時執行向量檢索與知識圖譜查詢
   Phase 3（generation.py）→ 生成 AI 整合回答
 
 執行方式：
@@ -27,10 +27,9 @@ def main() -> None:
     print()
     # 顯示示範問題，幫助使用者快速上手
     print("示範問題：")
-    print("  1. 我想找省錢出國旅遊的書")
-    print("  2. 目前被借出的商業管理類書籍有幾本？")
-    print("  3. Mary 和 Jason 共同寫過哪些書？")
-    print("  4. 我想第一次自助旅行，最好是有交通卡、城市移動和行程安排建議的書，適合看哪一本？")
+    print("  1. 目前被借出的商業管理類書籍有幾本？")
+    print("  2. Mary 和 Jason 共同寫過哪些書？")
+    print("  3. 我想第一次自助旅行，最好是有交通卡、城市移動和行程安排建議的書，適合看哪一本？")
     print()
 
     # 進入互動式問答迴圈，持續等待使用者輸入問題
@@ -58,18 +57,18 @@ def main() -> None:
         print("正在執行向量檢索...")
         vector_docs = vector_retrieve(query, top_k=5)
 
-        # 顯示向量檢索到的書籍清單與相似距離分數
-        print("\n向量檢索結果（相似距離分數越小，語意越相近）：")
+        # 顯示向量檢索到的書籍清單與相似度分數
+        print("\n向量檢索結果（相似度分數越小，語意越相近）：")
         # 用計數器 i 為每本書標上編號，從 1 開始
         for i, doc in enumerate(vector_docs, start=1):
-            # 從 doc 取出 metadata 與相似距離分數
+            # 從 doc 取出 metadata 與相似度分數
             metadata = doc.get("metadata", {})
             score = float(doc["score"])
-            # 印出書名、分類、作者與相似距離分數
+            # 印出書名、分類、作者與相似度分數
             print(f"  {i}. {metadata.get('book', '')}")
             print(f"     分類：{metadata.get('category', '')}")
             print(f"     作者：{metadata.get('authors', '')}")
-            print(f"     相似距離分數：{score:.4f}")
+            print(f"     相似度分數：{score:.4f}")
 
         print()
 
@@ -99,8 +98,8 @@ def main() -> None:
 
         print()
 
-        # 呼叫 generation.py 整合向量檢索與知識圖譜結果生成 AI 回答
-        print("===== Hybrid RAG 的回答 =====")
+        # 呼叫 generation.py 整合向量檢索與知識圖譜查詢結果生成 AI 回答
+        print("AI 回答：")
         answer = generate(query, vector_docs, graph_result)
         # 印出 AI 回答，並回到問答迴圈等待下一個問題
         print(answer)

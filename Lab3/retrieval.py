@@ -1,7 +1,7 @@
 """
 Hybrid RAG - Phase 2：混合檢索
 =================================
-retrieval.py 對單一問題同時提供向量檢索與知識圖譜檢索兩條路徑：
+retrieval.py 對單一問題同時提供向量檢索與知識圖譜查詢兩條路徑：
   - vector_retrieve(): Milvus 向量相似搜尋
   - graph_retrieve(): LLM 生成 Cypher 並查詢 Neo4j
 
@@ -114,7 +114,7 @@ def vector_retrieve(query: str, top_k: int = 5) -> list[dict]:
     # 因為同一本書可能有多個 chunks 出現在搜尋結果中，所以先取回較多 chunks
     # 再從中整理出最多 top_k 本不同書籍
     search_k = max(10, top_k * 3)
-    # 將使用者問題轉成問題向量，在 Milvus 中搜尋最相近的 search_k 個 chunks，同時回傳相似距離分數
+    # 將使用者問題轉成問題向量，在 Milvus 中搜尋最相近的 search_k 個 chunks，同時回傳相似度分數
     results = vector_store.similarity_search_with_score(query, k=search_k)
 
     # 用 set 記錄已出現的 book_id，避免同一本書重複加入結果
@@ -122,7 +122,7 @@ def vector_retrieve(query: str, top_k: int = 5) -> list[dict]:
     # 初始化結果 list，存放最終回傳的書籍資訊
     docs = []
 
-    # results 已依相似距離排序，因此同一本書第一次出現時，就是該書排名最前面的 chunk
+    # results 已依相似度由高到低排序，每本書取第一次出現的（即最相關的 chunk）
     for doc, score in results:
         # 從 metadata 取得此 chunk 對應的書籍 ID
         book_id = doc.metadata.get("book_id")
@@ -132,14 +132,14 @@ def vector_retrieve(query: str, top_k: int = 5) -> list[dict]:
 
         # 將此書的 book_id 加入 seen 集合，後續相同書籍的 chunk 會被跳過
         seen_book_ids.add(book_id)
-        # 將書籍的 metadata、命中的 chunk 內容、相似距離分數加入結果 list
+        # 將書籍的 metadata、命中的 chunk 內容、相似度分數加入結果 list
         docs.append(
             {
                 # metadata 包含書名、作者、借閱狀態等書籍資訊
                 "metadata": doc.metadata,
                 # 命中的 chunk 原文，可用來檢視為何此書被檢索到
                 "matched_page_content": doc.page_content,
-                # 相似距離分數，四捨五入至小數點後四位
+                # 相似度分數，四捨五入至小數點後四位
                 "score": round(float(score), 4),
             }
         )

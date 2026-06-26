@@ -64,7 +64,7 @@ def format_vector_context(vector_docs: list[dict]) -> str:
             f"【書籍 {i}】{metadata.get('book', '')}\n"
             f"  類別：{metadata.get('category', '')}　作者：{metadata.get('authors', '')}　定價：{metadata.get('price', 0.0)} 元\n"
             f"  借閱狀態：{borrowed_text}\n"
-            f"  相似距離分數：{doc.get('score', '')}\n"
+            f"  相似度分數：{doc.get('score', '')}\n"
             f"  相關段落：{doc.get('matched_page_content', '')}"
         )
 
@@ -72,7 +72,7 @@ def format_vector_context(vector_docs: list[dict]) -> str:
     return "\n\n".join(lines)
 
 
-# ── 整合向量檢索與知識圖譜結果呼叫 LLM 生成回答 ────────────
+# ── 整合向量檢索與知識圖譜查詢結果呼叫 LLM 生成回答 ────────────
 def generate(query: str, vector_docs: list[dict], graph_result: dict) -> str:
     # 將知識圖譜查詢結果格式化為 LLM 可讀的文字
     graph_context = format_graph_context(graph_result)
