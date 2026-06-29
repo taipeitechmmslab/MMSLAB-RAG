@@ -61,7 +61,7 @@ def build_documents(records: list[dict]) -> list[Document]:
         borrowed_text = "已借出" if borrower else "可借閱"
         # 取得借閱者姓名
         borrower_name = borrower.get("name", "")
-        # 組合成自然語言格式的字串，供語意檢索使用
+        # 組合成自然語言格式的字串，供向量檢索使用
         searchable_text = (
             # 書名欄位
             f"書名：{record['book']}\n"

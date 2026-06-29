@@ -34,7 +34,7 @@ def generate(query: str, retrieved_docs: list[dict]) -> str:
                 borrowed_text = f"目前已借出（借閱者：{borrower_name}）" if borrower_name else "目前已借出"
             else:
                 borrowed_text = "目前可借閱"
-            # matched_page_content 是語意檢索時命中的相關段落，供 LLM 說明推薦理由
+            # matched_page_content 是向量檢索時命中的相關段落，供 LLM 說明推薦理由
             matched_page_content = doc.get("matched_page_content", "")
             # 將單本書的欄位整理成固定格式，作為 LLM 回答時的參考資料
             lines.append(

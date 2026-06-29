@@ -4,7 +4,7 @@ HyDE - 主程式入口
 main.py 負責啟動互動式圖書館問答系統，使用 Phase 1 建好的索引，
 並呼叫 Phase 2 與 Phase 3 完成檢索與回答生成：
   Phase 1（index.py）    → 事先建立索引
-  Phase 2（retrieval.py）→ 執行語意檢索
+  Phase 2（retrieval.py）→ 執行向量檢索
   Phase 3（generation.py）→ 生成 AI 回答
 
 執行方式：
@@ -50,7 +50,7 @@ def main() -> None:
         if not query:
             continue
 
-        # 呼叫 retrieval.py 進行語意檢索，取回 Top-K 為 5 的最相關書籍
+        # 呼叫 retrieval.py 進行向量檢索，取回 Top-K 為 5 的最相關書籍
         print()
         print("正在檢索相關書籍...")
         docs = retrieve(query, top_k=5)
