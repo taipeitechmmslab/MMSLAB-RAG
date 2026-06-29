@@ -22,7 +22,7 @@ load_dotenv()
 def main() -> None:
     # 顯示系統啟動訊息
     print("=" * 55)
-    print("      圖書館智慧問答系統 - Hybrid RAG")
+    print("      圖書館智慧問答系統")
     print("=" * 55)
     print()
     # 顯示示範問題，幫助使用者快速上手
