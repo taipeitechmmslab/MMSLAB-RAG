@@ -1,2 +1,0 @@
-langchain-nvidia-ai-endpoints
-python-dotenv
