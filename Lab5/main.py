@@ -19,7 +19,9 @@ load_dotenv()
 # ── 印出單次工具呼叫的參數、判斷原因與檢索結果 ──────────
 # 讓使用者能照順序看懂 Agent 每一步在做什麼、為什麼做
 def print_retrieval(retrieval: dict) -> None:
+    # 印出這次檢索的編號、呼叫的工具與參數
     print(f"── 第 {retrieval['index']} 次檢索：{retrieval['tool']}（參數：{retrieval['args']}）")
+    # reason 有值才代表推理模型記錄了判斷原因，一併印出
     if retrieval["reason"]:
         print(f"   判斷原因：{retrieval['reason']}")
 
@@ -38,14 +40,17 @@ def print_retrieval(retrieval: dict) -> None:
         # 顯示這次向量檢索到的書籍清單與相似度分數
         print("   向量檢索結果（相似度分數越小，語意越相近）：")
         for i, doc in enumerate(retrieval["artifact"], start=1):
+            # 取出這本書的 metadata 與相似度分數
             metadata = doc.get("metadata", {})
             score = float(doc["score"])
+            # 依序印出書名、分類、作者、相似度分數
             print(f"     {i}. {metadata.get('book', '')}")
             print(f"        分類：{metadata.get('category', '')}")
             print(f"        作者：{metadata.get('authors', '')}")
             print(f"        相似度分數：{score:.4f}")
 
     elif retrieval["tool"] == "graph_retrieve":
+        # graph_result 是 graph_retrieve 回傳的 artifact，包含 cypher／results／error／retries
         graph_result = retrieval["artifact"]
         # 展示 LLM 生成的 Cypher，逐行加上邊框符號方便閱讀
         print("   LLM 生成的 Cypher 查詢：")
@@ -79,11 +84,9 @@ def main() -> None:
     print()
     # 顯示示範問題，幫助使用者快速上手
     print("示範問題：")
-    print("  1. 我想找一本骨頭很硬、完全沒接觸過瑜珈的初學者在家自我練習的入門書。這本書的借閱者總共借了圖書館的哪幾本書？")
-    print("  2. 我想找一本教你看懂財報、了解企業獲利與風險的書。這本書的作者們，還合寫過哪些其他的商業管理類書籍？")
-    print("  3. 吳宗翰目前借閱中的語言學習類書籍有哪些？這些書的作者裡，還有誰是「語言學習」類其他書籍的唯一作者？")
-    print("  4. 王小明借閱的書裡，屬於語言學習類的是哪一本？如果他想接著挑戰更進階、以商務情境為主的日語教材，你會推薦哪一本？")
-    print("  5. 我想要一本可以陪伴我度過人生低潮的書。")
+    print("  1. 我想找一本骨頭很硬、完全沒接觸過瑜珈的初學者在家自我練習的入門書。如果已經有人借走這本書，我想參考一下他的書單，看看這位借閱者還借了圖書館的哪些書。")
+    print("  2. 王小明借閱的書裡，屬於語言學習類的是哪一本？如果他想接著挑戰更進階、以商務情境為主的日語教材，你會推薦哪一本？")
+    print("  3. 最近生活多了一些新的可能性，想找一本能陪我一起慢慢摸索、把日子過得更有滋味的書。")
     print()
 
     # 進入互動式問答迴圈，持續等待使用者輸入問題
