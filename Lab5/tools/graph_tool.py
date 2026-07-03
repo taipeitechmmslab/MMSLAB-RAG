@@ -1,5 +1,5 @@
 """
-Agentic RAG - 知識圖譜檢索 Tool（自由式 ReAct 版本）
+Agentic RAG - 知識圖譜檢索 Tool
 =================================
 graph_tool.py 提供 graph_retrieve() 這個正式的 LangChain Tool，
 由 agent.py 中的 LLM 透過 bind_tools() 自主決定要不要呼叫、呼叫幾次。
@@ -30,8 +30,38 @@ from dotenv import load_dotenv
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.tools import tool
 from clients import get_llm, get_neo4j_driver
-from generation import format_graph_context
 load_dotenv()
+
+# 模組載入時建立一次連線並重複使用，避免每次呼叫都重新連線
+NEO4J_DRIVER = get_neo4j_driver()
+
+
+# ── 將知識圖譜查詢結果格式化為 LLM 可讀的文字 ────────────
+# 作為 Tool 回傳給 LLM 的 content
+def format_graph_context(graph_result: dict | None) -> str:
+    # graph_result 為 None 代表 Agent 判斷此問題不需要知識圖譜檢索，未執行查詢
+    if graph_result is None:
+        return "（本次問題經 Agent 判斷不需要知識圖譜檢索，未執行查詢）"
+
+    # 從 graph_result 取出 LLM 產生的 Cypher
+    cypher = graph_result.get("cypher", "")
+    # 取出 Neo4j 查詢結果（dict list）
+    results = graph_result.get("results", [])
+    # 取出錯誤訊息；若查詢成功則為空字串
+    error = graph_result.get("error", "")
+
+    # 查詢失敗時，附上失敗原因與嘗試執行的 Cypher，讓 LLM 知道查無結果的緣由
+    if error:
+        return (
+            f"【Cypher 執行狀況】失敗，原因：{error}\n"
+            f"【嘗試執行的 Cypher】\n{cypher}"
+        )
+
+    # 查詢成功時，附上執行的 Cypher 與知識圖譜查詢結果作為回答依據
+    return (
+        f"【執行的 Cypher】\n{cypher}\n\n"
+        f"【知識圖譜查詢結果】\n{results}"
+    )
 
 
 # ── Graph Schema：描述知識圖譜結構 ──────────
@@ -96,7 +126,8 @@ LIMIT 5
 """.strip()
 
 
-# ── 只允許出現在 Cypher 中的 READ 關鍵字，其餘視為禁止的寫入 / 管理指令 ──────────
+# ── 只允許出現在 Cypher 中的 READ 關鍵字 ──────────
+# 其餘視為禁止的寫入 / 管理指令
 FORBIDDEN_KEYWORDS = ("CREATE", "MERGE", "DELETE", "SET", "REMOVE", "LOAD", "CALL", "FOREACH", "DROP")
 
 
@@ -156,10 +187,8 @@ def validate_cypher(cypher: str) -> tuple[bool, str]:
         if re.search(rf"\b{keyword}\b", cypher_upper):
             return False, f"Cypher 包含禁止的關鍵字：{keyword}"
 
-    # 建立 Neo4j 連線，準備以 EXPLAIN 進行語法檢查
-    driver = get_neo4j_driver()
     try:
-        with driver.session() as session:
+        with NEO4J_DRIVER.session() as session:
             # EXPLAIN 只會編譯查詢計畫、不會真正執行，可在查詢前先驗證語法是否正確
             session.run(f"EXPLAIN {cypher}")
         # EXPLAIN 未拋出例外，代表語法正確
@@ -167,24 +196,15 @@ def validate_cypher(cypher: str) -> tuple[bool, str]:
     except Exception as e:
         # 語法錯誤時回傳 Neo4j 提供的錯誤訊息，供 generate_cypher() 修正重試
         return False, str(e)
-    finally:
-        # 無論驗證成功與否，都關閉 Neo4j 連線
-        driver.close()
 
 
 # ── 在 Neo4j 中實際執行已驗證過的 Cypher ────────────
 def run_cypher(cypher: str) -> list[dict]:
-    # 建立 Neo4j 連線
-    driver = get_neo4j_driver()
-    try:
-        with driver.session() as session:
-            # 執行 Cypher 查詢
-            result = session.run(cypher)
-            # data() 會把查詢結果轉成 dict list，方便 agent.py 與 generation.py 使用
-            return result.data()
-    finally:
-        # 無論查詢成功與否，都關閉 Neo4j 連線
-        driver.close()
+    with NEO4J_DRIVER.session() as session:
+        # 執行 Cypher 查詢
+        result = session.run(cypher)
+        # data() 會把查詢結果轉成 dict list，方便 agent.py 與 format_graph_context() 使用
+        return result.data()
 
 
 # ── 將問題轉成 Cypher，驗證通過後查詢 Neo4j，失敗時自動重試 ────────────
@@ -206,8 +226,13 @@ def graph_retrieve(query: str, max_retries: int = 2) -> tuple[str, dict]:
 
     # attempt 從 0 開始，最多嘗試 max_retries + 1 次（第一次生成 + 最多 max_retries 次重試）
     for attempt in range(max_retries + 1):
-        # 若是第一次嘗試，previous_cypher／previous_error 皆為空字串；重試時則帶入前次失敗資訊
-        cypher = generate_cypher(query, previous_cypher=cypher, previous_error=error)
+        try:
+            # 若是第一次嘗試，previous_cypher／previous_error 皆為空字串；重試時則帶入前次失敗資訊
+            cypher = generate_cypher(query, previous_cypher=cypher, previous_error=error)
+        except Exception as e:
+            # LLM 呼叫本身失敗（例如逾時、限流），視同這一輪生成失敗，記錄錯誤後重試
+            error = str(e)
+            continue
 
         # 執行前先驗證 Cypher 是否安全、語法是否正確
         is_valid, validate_error = validate_cypher(cypher)

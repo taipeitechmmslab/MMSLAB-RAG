@@ -6,6 +6,7 @@ Agentic RAG - Tools package
 """
 
 from .graph_tool import graph_retrieve
+from .hyde_tool import hyde_query
 from .vector_tool import vector_retrieve
 
-TOOLS = [vector_retrieve, graph_retrieve]
+TOOLS = [hyde_query, vector_retrieve, graph_retrieve]
