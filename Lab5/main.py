@@ -16,9 +16,26 @@ from agent import run_agentic_rag
 load_dotenv()
 
 
+# ── 印出單次 skill 使用的判斷原因與讀到的 SKILL.md 內容 ──────────
+# skill 是 Agent 自己讀取 SKILL.md 後套用的指示，沒有 args／artifact，改印出讀到的原始內容
+def print_skill_use(skill_use: dict) -> None:
+    print(f"── 第 {skill_use['index']} 次動作：使用 skill「{skill_use['skill']}」")
+    if skill_use["reason"]:
+        print(f"   判斷原因：{skill_use['reason']}")
+    print("   讀取到的 SKILL.md 內容：")
+    for line in skill_use["content"].splitlines():
+        print(f"     {line}")
+    print()
+
+
 # ── 印出單次工具呼叫的參數、判斷原因與檢索結果 ──────────
 # 讓使用者能照順序看懂 Agent 每一步在做什麼、為什麼做
 def print_retrieval(retrieval: dict) -> None:
+    # kind 為 skill 時，交給 print_skill_use 處理，不是工具呼叫沒有 args／artifact 可顯示
+    if retrieval["kind"] == "skill":
+        print_skill_use(retrieval)
+        return
+
     # 印出這次檢索的編號、呼叫的工具與參數
     print(f"── 第 {retrieval['index']} 次檢索：{retrieval['tool']}（參數：{retrieval['args']}）")
     # reason 有值才代表推理模型記錄了判斷原因，一併印出
