@@ -80,7 +80,7 @@ def run_agentic_rag(query: str) -> dict:
             skills=["skills/"],
         )
         # recursion_limit 避免 LLM 判斷失準時陷入無止盡的工具呼叫迴圈；
-        # deepagents 內建的 read_file／ls 等工具與讀取 skill 都會多佔用幾輪，門檻抓得比純 create_agent 高一些
+        # deepagents 內建的 read_file／ls 等工具與讀取 skill 都會多佔用幾輪，門檻抓得比較高一些
         result = agent.invoke({"messages": [HumanMessage(content=query)]}, {"recursion_limit": 40})
     except Exception as e:
         # LLM 呼叫本身失敗時（例如逾時、限流）沒有訊息紀錄可還原，回傳友善訊息，error 保留原始例外供除錯
