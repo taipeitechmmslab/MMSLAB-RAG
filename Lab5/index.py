@@ -261,28 +261,29 @@ def build_graph_index(records: list[dict]) -> None:
             print(f"[{index}/{len(records)}] {record['book']}")
 
         print("知識圖譜建立完成")
+
         print("\n知識圖譜統計：")
-        # 列印知識圖譜統計資訊，確認建立了多少節點與關係
-        for name, cypher in {
-            # 統計 Book 節點數
-            "Book": "MATCH (b:Book) RETURN count(b) AS count",
-            # 統計 Category 節點數
-            "Category": "MATCH (c:Category) RETURN count(c) AS count",
-            # 統計 Author 節點數
-            "Author": "MATCH (a:Author) RETURN count(a) AS count",
-            # 統計 Borrower 節點數
-            "Borrower": "MATCH (p:Borrower) RETURN count(p) AS count",
-            # 統計 BELONGS_TO 關係數
-            "BELONGS_TO": "MATCH ()-[r:BELONGS_TO]->() RETURN count(r) AS count",
-            # 統計 WROTE 關係數
-            "WROTE": "MATCH ()-[r:WROTE]->() RETURN count(r) AS count",
-            # 統計 BORROWED 關係數
-            "BORROWED": "MATCH ()-[r:BORROWED]->() RETURN count(r) AS count",
-        }.items():
-            # 執行統計 Cypher 並取出 count 欄位
+
+        # 節點統計：代表圖譜中有多少個「實體」
+        print("節點：")
+        for name, cypher, desc in [
+            ("Book", "MATCH (b:Book) RETURN count(b) AS count", "總共有 {count} 本不同的書"),
+            ("Category", "MATCH (c:Category) RETURN count(c) AS count", "將所有書分成 {count} 個不同的分類"),
+            ("Author", "MATCH (a:Author) RETURN count(a) AS count", "總共有 {count} 位不同的作者"),
+            ("Borrower", "MATCH (p:Borrower) RETURN count(p) AS count", "目前有 {count} 位不同的借閱者"),
+        ]:
             count = session.run(cypher).single()["count"]
-            # 對齊輸出節點或關係名稱與數量
-            print(f"  - {name:<20} {count}")
+            print(f"  - {name}：{desc.format(count=count)}")
+
+        # 關係統計：用「表示「...」」句型說明連結方向與意義
+        print("關係：")
+        for name, cypher, desc in [
+            ("BELONGS_TO", "MATCH ()-[r:BELONGS_TO]->() RETURN count(r) AS count", "表示「這本書屬於哪個分類」"),
+            ("WROTE", "MATCH ()-[r:WROTE]->() RETURN count(r) AS count", "表示「這位作者寫了這本書」"),
+            ("BORROWED", "MATCH ()-[r:BORROWED]->() RETURN count(r) AS count", "表示「這位借閱者借了這本書」"),
+        ]:
+            count = session.run(cypher).single()["count"]
+            print(f"  - {name}：{desc}，共 {count} 筆")
 
     # 關閉 Neo4j 連線，釋放資源
     driver.close()
