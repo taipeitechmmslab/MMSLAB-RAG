@@ -115,11 +115,11 @@ def split_documents(documents: list[Document]) -> list[Document]:
 
 
 # ── 將所有 chunk 向量化並存入 Milvus 向量資料庫 ────────────
-def build_vector_store(chunks: list[Document]) -> Milvus:
+def build_vector_store(chunks: list[Document]) -> None:
     # 提示使用者此步驟需要一些時間
     print("正在向量化 chunks 並寫入 Milvus，請稍候...")
     # 將 chunks 進行向量化，並存入向量資料庫
-    vector_store = Milvus.from_documents(
+    Milvus.from_documents(
         # 傳入要存入的 chunk list
         documents=chunks,
         # 指定使用 NVIDIA NIM Embedding Model 進行向量化
@@ -135,8 +135,6 @@ def build_vector_store(chunks: list[Document]) -> Milvus:
     )
     # 確認寫入完成
     print(f"已建立 {MILVUS_COLLECTION} collection 並存入 {len(chunks)} 個 chunks")
-    # 回傳建立好的向量資料庫物件
-    return vector_store
 
 
 # ── 將書籍資料建立成 Neo4j 知識圖譜 ──────────
