@@ -186,5 +186,5 @@ def run_agentic_rag(query: str) -> Iterator[dict]:
     # 推理模型偶爾只把下一步寫進推理過程卻沒真的送出內容，導致 last_answer 為 None，視同無效答案
     yield {
         "type": "answer",
-        "answer": last_answer or "抱歉，系統已完成檢索，但未能整理出完整回答，請重新輸入問題或稍後再試。",
+        "answer": last_answer or "抱歉，這次 LLM 未能產生完整回答內容（並非系統故障），請重新輸入問題或稍後再試。",
     }
