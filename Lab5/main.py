@@ -127,23 +127,23 @@ def main() -> None:
 
         print()
 
-        # 呼叫 agent.py 的 run_agentic_rag 執行完整的 Agentic RAG 流程
-        result = run_agentic_rag(query)
-
-        # 若 LLM 呼叫本身失敗（例如逾時、限流），沒有檢索記錄可顯示，直接印出原始錯誤訊息除錯
-        if result.get("error"):
-            print(f"Agent 執行失敗：{result['error']}")
-            print()
-
-        # 依實際執行順序，逐筆印出每一次工具呼叫的參數、判斷原因與檢索結果
+        # 呼叫 agent.py 的 run_agentic_rag，逐步消費 generator：
+        # 每一次工具呼叫／skill 套用一完成就立即印出，不用等整個 Agentic RAG 流程跑完
         print("Agent 決策過程：")
-        for retrieval in result["retrievals"]:
-            print_retrieval(retrieval)
-
-        # 顯示 agent.py 整合檢索結果後生成的 AI 回答
-        print("AI 回答：")
-        print(result["answer"])
-        print()
+        for event in run_agentic_rag(query):
+            if event["type"] == "retrieval":
+                print_retrieval(event)
+            elif event["type"] == "error":
+                # LLM 呼叫本身失敗時（例如逾時、限流），印出原始錯誤訊息除錯，不再有後續事件
+                print(f"Agent 執行失敗：{event['error']}")
+                print()
+                print("抱歉，目前系統暫時無法處理您的問題，請稍後再試。")
+                print()
+            elif event["type"] == "answer":
+                # 顯示 agent.py 整合檢索結果後生成的 AI 回答
+                print("AI 回答：")
+                print(event["answer"])
+                print()
 
 
 # 確保此檔案被直接執行時才呼叫 main()，被 import 時不執行
