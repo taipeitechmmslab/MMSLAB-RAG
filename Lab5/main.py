@@ -28,12 +28,34 @@ def print_skill_use(skill_use: dict) -> None:
     print()
 
 
+# ── 印出單次寫檔動作的路徑、內容與判斷原因 ──────────
+# write_file 是 booklist-markdown-exporter 這個 skill 實際落地成檔案的那一步，沒有 args／artifact，
+# 改印出這次寫入的路徑與內容
+def print_file_write(file_write: dict) -> None:
+    print(f"── 第 {file_write['index']} 次動作：寫入檔案「{file_write['file_path']}」")
+    if file_write["reason"]:
+        print(f"   判斷原因：{file_write['reason']}")
+    if file_write["error"] is not None:
+        print(f"   ⚠ 寫入失敗：{file_write['error']}")
+        print()
+        return
+    print("   寫入內容：")
+    for line in file_write["content"].splitlines():
+        print(f"     {line}")
+    print()
+
+
 # ── 印出單次工具呼叫的參數、判斷原因與檢索結果 ──────────
 # 讓使用者能照順序看懂 Agent 每一步在做什麼、為什麼做
 def print_retrieval(retrieval: dict) -> None:
     # kind 為 skill 時，交給 print_skill_use 處理，不是工具呼叫沒有 args／artifact 可顯示
     if retrieval["kind"] == "skill":
         print_skill_use(retrieval)
+        return
+
+    # kind 為 file_write 時，交給 print_file_write 處理，不是工具呼叫沒有 args／artifact 可顯示
+    if retrieval["kind"] == "file_write":
+        print_file_write(retrieval)
         return
 
     # 印出這次檢索的編號、呼叫的工具與參數
