@@ -129,7 +129,7 @@ def main() -> None:
 
         # 呼叫 agent.py 的 run_agentic_rag，逐步消費 generator：
         # 每一次工具呼叫／skill 套用一完成就立即印出，不用等整個 Agentic RAG 流程跑完
-        print("Agent 決策過程：")
+        print("AI Agent 檢索中，請稍後...")
         for event in run_agentic_rag(query):
             if event["type"] == "retrieval":
                 print_retrieval(event)
