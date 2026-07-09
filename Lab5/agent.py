@@ -123,6 +123,7 @@ def run_agentic_rag(query: str) -> Iterator[dict]:
         # stream_mode="updates" 讓每個節點跑完就吐出這一步新增的訊息
         for chunk in agent.stream({"messages": [HumanMessage(content=query)]}, config, stream_mode="updates"):
             for node_update in chunk.values():
+                # node_update 可能不含 messages（其他 state 更新），跳過避免後面 KeyError
                 if not isinstance(node_update, dict) or "messages" not in node_update:
                     continue
 
@@ -133,7 +134,8 @@ def run_agentic_rag(query: str) -> Iterator[dict]:
                         reasoning_blocks = [b for b in message.content_blocks if b.get("type") == "reasoning"]
                         # 把各段 reasoning 文字接起來，即為 LLM 呼叫工具前的判斷原因
                         reason = " ".join(b.get("reasoning", "") for b in reasoning_blocks).strip()
-                        # 一輪可能同時呼叫多個工具，逐一處理每個 tool_call
+                        # 一輪可能同時呼叫多個工具，逐一存進 pending_calls；
+                        # 之後對應的 ToolMessage 用 tool_call_id 配對回來才組得出完整事件
                         for tool_call in message.tool_calls:
                             pending_calls[tool_call["id"]] = {
                                 "tool": tool_call["name"],
@@ -159,6 +161,8 @@ def run_agentic_rag(query: str) -> Iterator[dict]:
                             skill_match = SKILL_PATH_PATTERN.search(call_info.get("args", {}).get("file_path", ""))
                             if skill_match:
                                 retrieval_count += 1
+                                # yield 會在此暫停並把 dict 交給 main.py；main.py 印完、
+                                # for 迴圈跟這裡要下一筆時，才會從這裡繼續往下跑
                                 yield {
                                     "type": "retrieval",
                                     "index": retrieval_count,
