@@ -20,6 +20,11 @@ TOOL_LABELS = {
     "graph_retrieve": "知識圖譜檢索工具",
 }
 
+# skill 名稱對應的中文說明，用於動作標題行
+SKILL_LABELS = {
+    "booklist-markdown-exporter": "儲存推薦書單",
+}
+
 
 # ── 啟動圖書館智慧問答系統 ──────────────────────────────────
 def main() -> None:
@@ -79,7 +84,7 @@ def main() -> None:
 
             if event["kind"] == "skill":
                 # skill 事件沒有工具參數和檢索結果，只顯示使用原因與 SKILL.md 內容
-                print(f"── 第 {event['index']} 次動作：使用 skill「{event['skill']}」")
+                print(f"── 第 {event['index']} 次動作：調用{SKILL_LABELS.get(event['skill'], event['skill'])}")
                 if event["reason"]:
                     print(f"   判斷原因：{event['reason']}")
                 print("   讀取到的 SKILL.md 內容：")
