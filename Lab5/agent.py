@@ -98,7 +98,7 @@ N、M 請填入實際本數；若某一組本數為 0，仍須保留完整標籤
 請使用繁體中文回答，語氣親切、條理清晰。"""
 
 
-# ── 執行一次完整的 Agentic RAG 問答流程（generator，逐步 yield 決策過程） ────────
+# ── 執行一次完整的 Agentic RAG 問答流程 ────────
 def run_agentic_rag(query: str) -> Iterator[dict]:
     # thread_id 讓 checkpointer 接續同一場對話的歷史訊息
     config = {"configurable": {"thread_id": THREAD_ID}, "recursion_limit": 40}
