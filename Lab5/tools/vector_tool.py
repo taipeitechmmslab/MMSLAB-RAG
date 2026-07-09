@@ -61,6 +61,9 @@ def format_vector_context(vector_docs: list[dict] | None) -> str:
 
 
 # ── 使用問題向量從 Milvus 向量資料庫檢索書籍 ────────────
+# @tool 讓 LLM 能透過 tool_calls 自主呼叫這個函式；例如讀者問「想找主題相近、能讓人放鬆的書」這種語意模糊的推薦需求時，
+# LLM 會讀到下面 docstring 寫著「適用於語意相似、模糊需求推薦」而決定呼叫 vector_retrieve；
+# response_format="content_and_artifact" 讓回傳拆成兩份：content 給 LLM 讀，artifact 是給程式顯示用的結構化資料，LLM 不會看到
 @tool(response_format="content_and_artifact")
 def vector_retrieve(query: str, top_k: int = 5) -> tuple[str, list[dict]]:
     """向量相似度檢索書籍，適用於語意相似、模糊需求推薦、內容描述型問題，

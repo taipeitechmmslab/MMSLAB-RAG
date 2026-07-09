@@ -23,6 +23,9 @@ load_dotenv()
 
 
 # ── 生成 HyDE 假想文件工具 ────────────
+# @tool 讓 LLM 能透過 tool_calls 自主呼叫這個函式；例如讀者問「想找一本能讓生活更豐富的書」這種抽象籠統的問題時，
+# LLM 會讀到下面 docstring 寫著「適用於讀者問題較抽象、籠統」而決定呼叫 hyde_query；
+# response_format="content_and_artifact" 讓回傳拆成兩份：content 給 LLM 讀，artifact 是給程式顯示用的結構化資料，LLM 不會看到
 @tool(response_format="content_and_artifact")
 def hyde_query(query: str) -> tuple[str, str]:
     """HyDE（假設性文件生成），適用於讀者問題較抽象、籠統，直接用原始問題檢索

@@ -208,6 +208,9 @@ def run_cypher(cypher: str) -> list[dict]:
 
 
 # ── 將問題轉成 Cypher，驗證通過後查詢 Neo4j，失敗時自動重試 ────────────
+# @tool 讓 LLM 能透過 tool_calls 自主呼叫這個函式；例如讀者問「某分類目前可借閱的書有哪些」這種精確事實型問題時，
+# LLM 會讀到下面 docstring 寫著「適用於精確實體查詢、結構化過濾」而決定呼叫 graph_retrieve；
+# response_format="content_and_artifact" 讓回傳拆成兩份：content 給 LLM 讀，artifact 是給程式顯示用的結構化資料，LLM 不會看到
 @tool(response_format="content_and_artifact")
 def graph_retrieve(query: str, max_retries: int = 2) -> tuple[str, dict]:
     """知識圖譜檢索書籍資料，適用於精確實體查詢（某作者寫了哪些書、某人借了哪些書）、
