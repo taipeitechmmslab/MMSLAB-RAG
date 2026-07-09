@@ -20,14 +20,10 @@ MILVUS_COLLECTION = "library_books"
 
 # ── 建立 NVIDIA NIM LLM ────────────
 def get_llm(**kwargs) -> ChatNVIDIA:
-    # 從環境變數取得 LLM 模型名稱與 NVIDIA NIM API 金鑰，kwargs 轉傳給 ChatNVIDIA（例如 temperature）
-    # model_kwargs 是 ChatNVIDIA 官方提供的「額外參數」欄位，會直接轉送進 API 請求；
-    # chat_template_kwargs={"thinking": True}：部分推理模型（如 Qwen3 系列）預設不輸出思考過程，
-    # 需明確開啟才會填 reasoning_content；已實測對不支援此參數的模型（如 gpt-oss）無影響
-    # max_tokens=None：ChatNVIDIA 預設值只有 1024，長答案容易被截斷；明確設 None 會讓請求
-    # 不帶這個欄位，改用各模型自己在 NVIDIA NIM 上的預設上限（此參數已過時但仍正確生效，
-    # 改用新名稱 max_completion_tokens=None 反而因套件本身的邏輯漏洞不會生效）
-    # timeout=120：拿掉 max_tokens 上限後生成時間變長，預設 60 秒的連線逾時較容易被撞到
+    # kwargs 可傳入 temperature 等額外設定，最後交給 ChatNVIDIA 使用
+    # 開啟支援模型的推理內容；不支援的模型會忽略此設定
+    # max_tokens=None 可避免 ChatNVIDIA 預設 1024 tokens 截斷長答案
+    # 長答案生成時間較久，因此把 timeout 從預設 60 秒提高到 120 秒
     return ChatNVIDIA(
         model=os.environ.get("LLM_MODEL"),
         api_key=os.environ.get("NVIDIA_NIM_API_KEY"),
