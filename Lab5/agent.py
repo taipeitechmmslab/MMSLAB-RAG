@@ -213,7 +213,5 @@ def run_agentic_rag(query: str) -> Iterator[dict]:
     if last_answer and FAKE_TOOL_CALL_PATTERN.search(last_answer):
         last_answer = None
 
-    yield {
-        "type": "answer",
-        "answer": last_answer or "抱歉，LLM 產生回答時發生意外，請再重新詢問問題或者更換 LLM。",
-    }
+    # answer 為 None 代表這輪沒有拿到有效答案，訊息文字交給 main.py 決定
+    yield {"type": "answer", "answer": last_answer}
