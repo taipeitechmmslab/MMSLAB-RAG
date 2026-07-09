@@ -111,6 +111,10 @@ def main() -> None:
             print(f"── 第 {event['index']} 次檢索：調用{TOOL_LABELS.get(event['tool'], '')}{event['tool']}")
             if event["reason"]:
                 print(f"   判斷原因：{event['reason']}")
+            if event["args"]:
+                print("   呼叫參數：")
+                for key, value in event["args"].items():
+                    print(f"     {key}: {value}")
 
             if event["error"] is not None:
                 print(f"   ⚠ 呼叫失敗：{event['error']}")
