@@ -71,9 +71,10 @@ def main() -> None:
 
         # 呼叫 generation.py 根據檢索結果生成 AI 回答
         print()
-        print("AI 回答：")
+        print("正在生成 AI 回答...")
         answer = generate(query, docs)
         # 印出 AI 回答，並回到問答迴圈等待下一個問題
+        print("AI 回答：")
         print(f"{answer}")
         print()
 

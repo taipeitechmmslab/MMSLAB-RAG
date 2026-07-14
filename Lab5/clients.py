@@ -40,6 +40,8 @@ def get_embeddings() -> NVIDIAEmbeddings:
     return NVIDIAEmbeddings(
         model=os.environ.get("EMBEDDING_MODEL"),
         api_key=os.environ.get("NVIDIA_NIM_API_KEY"),
+        # 最多等待 Embedding Model 回應 60 秒
+        timeout=60,
     )
 
 

@@ -100,6 +100,8 @@ def retrieve(query: str) -> dict:
             model=os.environ.get("LLM_MODEL"),
             # 從環境變數取得 NVIDIA NIM API 金鑰
             api_key=os.environ.get("NVIDIA_NIM_API_KEY"),
+            # 最多等待 LLM 回應 60 秒，逾時後會拋出 Timeout 例外
+            timeout=60,
             # 降低 LLM 回答時的隨機性，讓相同問題盡量產生一致的 Cypher
             temperature=0.0,
         )
@@ -154,7 +156,7 @@ def retrieve(query: str) -> dict:
             # 無論查詢成功與否，都關閉 Neo4j 連線
             driver.close()
     except Exception as e:
-        # 如果 LLM 或 Neo4j 查詢失敗，回傳錯誤訊息供 main.py 顯示
+        # 將 LLM 或 Neo4j 的錯誤交給 generation.py，讓 LLM 知道知識圖譜查詢失敗
         return {
             "cypher": cypher,
             "results": [],

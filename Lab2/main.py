@@ -78,9 +78,10 @@ def main() -> None:
                 print(f"  {i}. " + "，".join(parts))
 
         # 呼叫 generation.py 根據知識圖譜結果生成 AI 回答
-        print("\nAI 回答：")
+        print("\n正在生成 AI 回答...")
         answer = generate(query, result)
         # 印出 AI 回答，並回到問答迴圈等待下一個問題
+        print("AI 回答：")
         print(f"{answer}")
         print()
 

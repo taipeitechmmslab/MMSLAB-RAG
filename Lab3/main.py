@@ -99,9 +99,10 @@ def main() -> None:
         print()
 
         # 呼叫 generation.py 整合向量檢索與知識圖譜查詢結果生成 AI 回答
-        print("AI 回答：")
+        print("正在生成 AI 回答...")
         answer = generate(query, vector_docs, graph_result)
         # 印出 AI 回答，並回到問答迴圈等待下一個問題
+        print("AI 回答：")
         print(answer)
         print()
 

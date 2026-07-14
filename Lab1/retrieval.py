@@ -23,6 +23,8 @@ def retrieve(query: str, top_k: int = 5) -> list[dict]:
             model=os.environ.get("EMBEDDING_MODEL"),
             # 從環境變數取得 NVIDIA NIM API 金鑰
             api_key=os.environ.get("NVIDIA_NIM_API_KEY"),
+            # 最多等待 Embedding Model 回應 60 秒
+            timeout=60,
         ),
         # 指定要查詢的 Milvus collection 名稱
         collection_name="library_books",
