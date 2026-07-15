@@ -264,6 +264,7 @@ def build_graph_index(records: list[dict]) -> None:
 
         # 節點統計：代表圖譜中有多少個「實體」
         print("節點：")
+        node_counts = {}
         for name, cypher, desc in [
             ("Book", "MATCH (b:Book) RETURN count(b) AS count", "總共有 {count} 本不同的書"),
             ("Category", "MATCH (c:Category) RETURN count(c) AS count", "將所有書分成 {count} 個不同的分類"),
@@ -271,17 +272,19 @@ def build_graph_index(records: list[dict]) -> None:
             ("Borrower", "MATCH (p:Borrower) RETURN count(p) AS count", "目前有 {count} 位不同的借閱者"),
         ]:
             count = session.run(cypher).single()["count"]
+            node_counts[name] = count
             print(f"  - {name}：{desc.format(count=count)}")
 
-        # 關係統計：用「表示「...」」句型說明連結方向與意義
+        # 關係統計：用「表示「...」」句型說明連結方向與意義，並帶入實際節點數量
         print("關係：")
-        for name, cypher, desc in [
-            ("BELONGS_TO", "MATCH ()-[r:BELONGS_TO]->() RETURN count(r) AS count", "表示「這本書屬於哪個分類」"),
-            ("WROTE", "MATCH ()-[r:WROTE]->() RETURN count(r) AS count", "表示「這位作者寫了這本書」"),
-            ("BORROWED", "MATCH ()-[r:BORROWED]->() RETURN count(r) AS count", "表示「這位借閱者借了這本書」"),
+        for name, cypher, desc, note in [
+            ("BELONGS_TO", "MATCH ()-[r:BELONGS_TO]->() RETURN count(r) AS count", "表示「書籍與分類之間的分類關係線」", "每本書皆歸類於一個分類，{book_count} 本書共產生 {count} 條關係線"),
+            ("WROTE", "MATCH ()-[r:WROTE]->() RETURN count(r) AS count", "表示「作者與書籍之間的寫作關係線」", "包含同一位作者撰寫多本書，以及一本書由多位作者合著的累計關係數量"),
+            ("BORROWED", "MATCH ()-[r:BORROWED]->() RETURN count(r) AS count", "表示「借閱者與書籍之間的借閱關係線」", "代表 {borrower_count} 位借閱者總共借閱了 {count} 本書，包含一人借閱多本書的累計關係數量"),
         ]:
             count = session.run(cypher).single()["count"]
-            print(f"  - {name}：{desc}，共 {count} 筆")
+            note_text = note.format(count=count, book_count=node_counts["Book"], borrower_count=node_counts["Borrower"])
+            print(f"  - {name}：{desc}，共 {count} 筆（{note_text}）")
 
     # 關閉 Neo4j 連線，釋放資源
     driver.close()
