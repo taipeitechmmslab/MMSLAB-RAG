@@ -104,7 +104,9 @@ RETURN DISTINCT coauthor.name AS coauthor, b.title AS title, c.name AS category
 問題：旅遊類有哪些書目前可以借？
 Cypher：
 MATCH (b:Book)-[:BELONGS_TO]->(:Category {name: "旅遊"})
-WHERE NOT (:Borrower)-[:BORROWED]->(b)
+WHERE NOT EXISTS {
+  MATCH (:Borrower)-[:BORROWED]->(b)
+}
 OPTIONAL MATCH (a:Author)-[:WROTE]->(b)
 RETURN b.title AS title, b.price AS price, collect(a.name) AS authors
 
@@ -150,7 +152,13 @@ def generate_cypher(query: str, previous_cypher: str = "", previous_error: str =
         "3. 必須使用 Schema 中定義的 Label 與 Relationship Type，不可自創。\n"
         "4. 字串比對使用完整實體名稱（如 \"Jason\"、\"旅遊\"），若需模糊匹配請用 CONTAINS。\n"
         "5. 回傳欄位應使用可讀性高的別名（AS title、AS author 等）。\n"
-        "6. 只輸出純 Cypher 語句，不要加上任何說明、Markdown 標記、反引號或前後綴文字。"
+        "6. 先判斷哪些條件會決定主要資料是否應出現在結果中；這些必要條件使用 MATCH、WHERE 或 EXISTS 處理。\n"
+        "7. OPTIONAL MATCH 只用於補充允許缺少的欄位；即使沒有配對資料，主要資料仍會保留。\n"
+        "8. 用於排除主要資料的 WHERE 必須放在相應的 MATCH 後，並在補充資訊的 OPTIONAL MATCH 前完成。"
+        "緊接 OPTIONAL MATCH 的 WHERE 只限制該次可選配對，不能用來排除主要資料。\n"
+        "9. 要求某個關係不存在時，優先使用 NOT EXISTS 子查詢。\n"
+        "10. Cypher 語法可以執行不代表查詢語意正確；輸出前必須確認不符合必要條件的主要資料會被完整排除。\n"
+        "11. 只輸出純 Cypher 語句，不要加上任何說明、Markdown 標記、反引號或前後綴文字。"
     )
 
     # 若帶有前次失敗的 Cypher 與錯誤訊息，將其附加到 Human Prompt，讓 LLM 依錯誤修正後重新生成
