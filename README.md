@@ -10,25 +10,25 @@
 
 　　◎國立臺北科技大學電子工程系 特聘教授
 
-　　◎加拿大安大略理工大學 國際客座教授
+　　◎加拿大McGill University 國際客座教授
 
-　　◎IEEE Sensors Journal 國際期刊編輯
+　　◎加拿大 Ontario Tech University 國際客座教授
 
-　　◎IEEE BigData Congress 國際會議主席
+　　◎IEEE Transactions for Intelligent Vehicles 國際副主編
 
-　　◎IEEE CloudCom Conference 國際會議主席
+　　◎IEEE Sensors Journal 國際副主編
 
 　　【獲獎】
 
-　　◎經濟部第5屆國家產業創新獎
+　　◎經濟部第 5 屆國家產業創新獎
 
-　　◎ACM臺灣分會，李國鼎青年研究獎
+　　◎ACM 臺灣分會李國鼎研究獎
 
-　　◎國立臺北科技大學電資學院，院傑出研究獎
+　　◎史丹福大學世界 2%頂尖科學家
 
-　　◎國立臺北科技大學，校傑出研究獎
+　　◎國立臺北科技大學校傑出研究獎
 
-　　◎國立臺北科技大學，Dr.Shechtman年輕學者獎
+　　◎國立臺北科技大學電資學院院傑出研究獎
 
 張富順
 
