@@ -36,5 +36,5 @@
 
 ## 購買連結
 
-- [天瓏書局]()
-- [博客來]()
+- [天瓏書局](https://www.tenlong.com.tw/products/9786264146333?list_name=srh)
+- [博客來](https://www.books.com.tw/products/0011063512?sloc=main)
